@@ -21,29 +21,7 @@ async def version():
 @router.get("/books")
 async def get_books():
     """Return the list of books"""
-    books_list = [
-        {"id": 1,
-         "title": "The Great Gatsby",
-         "author": "F. Scott Fitzgerald",
-         "cover_url": "https://images-na.ssl-images-amazon.com/images/I/51ZJ2q4%2BZEL._SX331_BO1,204,203,200_.jpg",
-         "auduiobook_url": "https://localhost:9001/gecho-bang-api/v1/books/1/audiobook.mp3",
-         "status": "not read",
-         "duration": "5h 30m",
-         "genre": "Fiction",
-         "published_date": "1925",
-         "progress": "20%",
-         "rating": 4.5,
-         "notes": [
-              {"id": 1, "content": "This is a great book"},
-              {"id": 2, "content": "I love the characters"},
-              {"id": 3, "content": "The plot is amazing"}
-         ]
-        },
-        {"id": 2, "title": "To Kill a Mockingbird", "author": "Harper Lee"},
-        {"id": 3, "title": "1984", "author": "George Orwell"},
-        {"id": 4, "title": "Pride and Prejudice", "author": "Jane Austen"},
-        {"id": 5, "title": "The Catcher in the Rye", "author": "J.D. Salinger"}
-    ]
+    books_list = Book.objects.all
     return JSONResponse(content={"books": books_list})
 
 

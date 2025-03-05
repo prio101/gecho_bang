@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
 
     class Config:
-      """Load environment variables from .env file"""
-      env_file = '.env'
+        """Load environment variables from .env file"""
+        env_file = '.env'
 
 settings = Settings()
