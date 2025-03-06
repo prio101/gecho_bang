@@ -22,6 +22,7 @@ class BookUpdate(BaseModel):
     progress: Optional[int] = None
     rating: Optional[int] = None
     user_id: Optional[int] = None
+    file: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -38,6 +39,7 @@ class BookResponse(BaseModel):
     progress: int
     rating: int
     user_id: int
+    file: str
 
     class Config:
         orm_mode = True

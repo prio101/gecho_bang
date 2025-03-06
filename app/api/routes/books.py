@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from app.repo.book_repo import BookRepo
 from app.schemas.book_schemas import BookCreate, BookUpdate
+from app.minio import MinioUploader
+import base64
 
 router = APIRouter(prefix="/api/v1", tags=["API"])
 
@@ -19,8 +21,12 @@ async def get_books():
 async def get_book(book_id: int):
     """Return the book details"""
     book = BookRepo().get_book(book_id)
+    if not book:
+        return HTTPException(content={"message": "Book not found"},
+                            status_code=404)
 
-    return JSONResponse(content={"data": book}, status_code=200)
+    data_encoded = jsonable_encoder(book)
+    return JSONResponse(content={"data": data_encoded}, status_code=200)
 
 
 @router.post("/books")
@@ -40,11 +46,17 @@ async def create_book(book_create: BookCreate):
 @router.patch("/books/{book_id}")
 async def update_book(book_id: int, book_update: BookUpdate):
     """Update a book"""
+    if not BookRepo().get_book(book_id):
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    if book_update.file:
+        file = base64.b64decode(book_update.file)
+        book_update.file = file
 
     book = BookRepo().update_book(book_id, book_update)
+
     if not book:
-        return JSONResponse(content={"message": "Book not updated"},
-                            status_code=400)
+        raise HTTPException(status_code=400, detail="Book not updated")
 
     book_data = jsonable_encoder(book)
     return JSONResponse(content={"message": "Book updated successfully",
@@ -67,4 +79,28 @@ async def delete_book(book_id: int):
                             status_code=400)
 
     return JSONResponse(content={"message": "Book deleted successfully"},
+                                 status_code=200)
+
+
+@router.post("/books/{book_id}/upload")
+async def upload_file(book_id: int, file: UploadFile = File(...)):
+    """Upload a file"""
+    book = BookRepo().get_book(book_id)
+    if not book:
+        return JSONResponse(content={"message": "Book not found"},
+                            status_code=404)
+
+    file_content = await file.read()
+    file_name = f"{book_id}_{file.filename}"
+
+    file_url = MinioUploader().upload_file(file_name, file_content)
+
+    if file_url:
+        book.file = file_url
+        BookRepo().update_book(book_id, book)
+
+    return JSONResponse(content={
+                                    "message": "File uploaded successfully",
+                                    "file": file_url
+                                },
                                  status_code=200)

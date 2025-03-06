@@ -19,6 +19,7 @@ class Book(Base):
     genre = Column(String, index=True)
     progress = Column(Integer)
     rating = Column(Integer)
+    file = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
 
 
