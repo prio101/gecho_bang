@@ -36,5 +36,4 @@ class MinioUploader:
         file_stream = io.BytesIO(file_content)
         self.minio_client.put_object(self.bucket_name, file_name, file_stream, file_size)
         file_url = self.minio_client.presigned_get_object(self.bucket_name, file_name)
-        breakpoint()
         return file_url
