@@ -21,6 +21,7 @@ class Book(Base):
     rating = Column(Integer)
     user_id = Column(Integer, ForeignKey("users.id"))
 
+
 class Note(Base):
     __tablename__ = "notes"
     id = Column(Integer, primary_key=True, index=True)

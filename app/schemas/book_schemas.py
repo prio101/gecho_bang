@@ -1,6 +1,33 @@
 from pydantic import BaseModel
+from typing import Optional
 
-class BookBase(BaseModel):
+class BookCreate(BaseModel):
+    title: str
+    author: str
+    status: str
+    genre: str
+    user_id: int
+
+
+
+class BookUpdate(BaseModel):
+    id: Optional[int] = None
+    title: Optional[str] = None
+    author: Optional[str] = None
+    cover_url: Optional[str] = None
+    audiobook_url: Optional[str] = None
+    status: Optional[str] = None
+    duration: Optional[str] = None
+    genre: Optional[str] = None
+    progress: Optional[int] = None
+    rating: Optional[int] = None
+    user_id: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
+class BookResponse(BaseModel):
+    id: int
     title: str
     author: str
     cover_url: str
@@ -10,16 +37,8 @@ class BookBase(BaseModel):
     genre: str
     progress: int
     rating: int
-
-class BookCreate(BookBase):
-    pass
-
-class BookUpdate(BookBase):
-    pass
-
-class BookResponse(BookBase):
-    id: int
     user_id: int
 
     class Config:
-        orm_mode: True
+        orm_mode = True
+
