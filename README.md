@@ -67,3 +67,19 @@ Free And OpenSourced Audible Alternative with AI powered TTS
 
 ### MVP Version 1.3
 - [ ] Add the Theme Customization
+
+
+
+
+## SCRIPTS:
+----------------
+RUNNING CELERY:
+===
+1. run celery: `celery -A app.tasks.celery worker --loglevel=info`
+2. run flower as celery monitor: `celery -A app.tasks.celery flower`
+
+
+RUNNING FASTAPI:
+===
+1. run `fastapi dev --port 4000`
+

@@ -41,6 +41,7 @@ class BookRepo:
         book.rating = book_update.rating
         book.user_id = book_update.user_id
         book.file = book_update.file
+        book.status = book_update.status
         self.db.commit()
         self.db.refresh(book)
         return book

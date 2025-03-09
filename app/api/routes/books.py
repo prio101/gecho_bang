@@ -1,10 +1,10 @@
-from fastapi import APIRouter, FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from app.repo.book_repo import BookRepo
 from app.schemas.book_schemas import BookCreate, BookUpdate
 from app.minio import MinioUploader
-from app.services import ConvertToImageService, FetchCoverService, OcrExtractTextService, TtsConvertService
+from app.tasks import process_book_task
 import base64
 
 router = APIRouter(prefix="/api/v1", tags=["API"])
@@ -108,31 +108,20 @@ async def upload_file(book_id: int, file: UploadFile = File(...)):
 
 
 @router.post("/books/{book_id}/process")
-async def process_book(book_id: int):
+async def process_book(book_id: int, background_tasks: BackgroundTasks):
     # process the cover url
     book = BookRepo().get_book(book_id)
     if not book:
         return JSONResponse(content={"message": "Book not found"},
                             status_code=404)
 
-    cover_url = FetchCoverService().fetch_cover(book_id)
-    if cover_url:
-        book.cover_url = cover_url
-        BookRepo().update_book(book_id, book)
+    # process the book
+    process_book_task.delay(book_id)
+    data_book = jsonable_encoder(book)
+    return JSONResponse(content={"message": "Book processed successfully",
+                                    "data": data_book},
+                                    status_code=200)
 
-    # process the pdf2image
-    if book.file:
-        image_path = ConvertToImageService(book.file).convert_to_image()
-    # process the ocr
-    if image_path:
-        text = OcrExtractTextService(image_path).extract
-    # process the tts
-    if text:
-        file_url = TtsConvertService(text).run()
-    # process the upload
-    if file_url:
-        book.audiobook_url = file_url
-        BookRepo().update_book(book_id, book)
 
-    return JSONResponse(content={"message": "Book processed successfully", "data": book}, status_code=200)
+
 
